@@ -5,8 +5,8 @@ library(spDataLarge)
 library(tidyverse)
 library(stplanr)
 
-FEATOutlets <- read_csv("./Point Data/FEAT_Food_Outlets.csv")
-HW_Postcode_Units <- read_csv("./Point Data/Holmewood_Postcode_Units.csv", 
+FEATOutlets <- read_csv("FEAT_Food_Outlets.csv")
+HW_Postcode_Units <- read_csv("Holmewood_Postcode_Units.csv", 
                               col_types = cols(
                                 osnrth1m = col_double()
                           )
@@ -82,7 +82,7 @@ SupermarketAccessMetrics <- Calc_FEAT_Access_Met(ODLines = Supermarket_OD_Lines,
 
 rm(Supermarket_OD_Lines)
 
-write_csv(SupermarketAccessMetrics,"./Point Data/Supermarket_Access_Metrics.csv")
+write_csv(SupermarketAccessMetrics,"Supermarket_Access_Metrics.csv")
 
 # Create Takeaway Access Metrics-------------------------------------------------
 
@@ -146,16 +146,16 @@ TakeawayAccessMetrics <- Calc_FEAT_Access_Met(ODLines = Takeaways_OD_Lines,
                                               FeatType = "Takeaways",
                                               PostcodeDataset = HW_Postcode_Units)
 
-write_csv(TakeawayAccessMetrics,"./Point Data/Takeaway_Access_Metrics.csv")
+write_csv(TakeawayAccessMetrics,"Takeaway_Access_Metrics.csv")
 
 
 
-#combine supermarkets and takeaways datasets
+#combine supermarkets and takeaways datasets and write to file.
 AccessMetrics <- SupermarketAccessMetrics %>%
   left_join(select(TakeawayAccessMetrics,
                    "pcd","closest_Takeaways":"Takeaways_count2km")
             , by = "pcd")
 
+write_csv(AccessMetrics,"HW_Access_Metrics.csv")
 
-
-ggplot(data = AccessMetrics) + geom_histogram(mapping = aes(x = closest_Takeaways), bins = 10)
+#ggplot(data = AccessMetrics) + geom_histogram(mapping = aes(x = closest_Takeaways), bins = 10)

@@ -18,20 +18,15 @@ library(htmltools)
 # Load Data ---------------------------------------------------------------
 
 
-england_msoa <- st_read("./Boundary Data/England_msoa_2011/england_msoa_2011.shp")
-BD_Postcode_Units <- read_csv("./Point Data/ONSPD_NOV_2020_UK_BD.csv")
-HW_Supermarket_Access_Metrics <- read_csv("./Point Data/Supermarket_Access_Metrics.csv")
+holmewood_msoa <- st_read("Holmewood_MSOA_2011.shp")
+BD_Postcode_Units <- read_csv("ONSPD_NOV_2020_UK_BD.csv")
+HW_Access_Metrics <- read_csv("HW_Access_Metrics.csv")
 
 
 # Data processing ---------------------------------------------------------
 
-
-holmewood_msoa <- england_msoa %>%
-  filter(code == "E02002234")
-
 HW_Postcode_Units <- BD_Postcode_Units %>%
   filter(msoa01 == "E02002234")
-
 
 
 #Converts point geographic features from BNG Easting and Northing to WGS LngLat
@@ -70,15 +65,15 @@ server <- function(input,output,session) {
  filtered_postcode_df <- reactive({
    
    req(input$postcode)
-   filtered_HW_postcodes <- HW_Supermarket_Access_Metrics %>% 
+   filtered_HW_postcodes <- HW_Access_Metrics %>% 
      filter(pcd == input$postcode)
  })
   
   output$mymap <- renderLeaflet({
     leaflet() %>%
       addTiles() %>% #Add default OpenStreetMap map tiles
-      addCircles(data = HW_Supermarket_Access_Metrics, 
-                 label = htmlEscape(HW_Supermarket_Access_Metrics$pcd)) %>%
+      addCircles(data = HW_Access_Metrics, 
+                 label = htmlEscape(HW_Access_Metrics$pcd)) %>%
       addPolygons(data = holmewood_msoa_leaflet,
                   color = "Red", weight = 2, fillOpacity = 0)
     #addCircles(data = FEAT_Leaflet_SF_LL, label = htmlEscape(paste("Name: ",FEAT_Leaflet_SF_LL$name," Type: ",FEAT_Leaflet_SF_LL$FEATClass)))
