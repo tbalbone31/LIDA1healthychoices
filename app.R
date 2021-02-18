@@ -18,7 +18,7 @@ library(htmltools)
 # Load Data ---------------------------------------------------------------
 
 
-holmewood_msoa <- st_read("Holmewood_MSOA_2011.shp")
+holmewood_msoa <- st_read("Holmewood_MSOA.shp")
 BD_Postcode_Units <- read_csv("ONSPD_NOV_2020_UK_BD.csv")
 HW_Access_Metrics <- read_csv("HW_Access_Metrics.csv")
 
@@ -83,28 +83,48 @@ server <- function(input,output,session) {
     paste(paste("Info about ", 
                 input$postcode),
           paste("Distance to Closest Supermarket (km): ", 
-                filtered_postcode_df()$closest_Supermarket),
-          paste("Mean Distance of Closest 3 Supermarkets (km) ", 
-                filtered_postcode_df()$mean_closest_3_Supermarket),
-          paste("Mean Distance of Closest 5 Supermarkets (km) ", 
-                filtered_postcode_df()$mean_closest_5_Supermarket),
-          paste("Number of Supermarkets within 1.5km", 
-                filtered_postcode_df()$Supermarket_density1.5km),
-          paste("Number of Supermarkets within 2km", 
-                filtered_postcode_df()$Supermarket_density2km),
-          paste("Number of Supermarkets within 2.5km",
-                filtered_postcode_df()$Supermarket_density2.5km),
+                round(filtered_postcode_df()$closest_Supermarket,digits = 2)),
+          paste("Mean Distance of Closest 3 Supermarkets (km): ", 
+                round(filtered_postcode_df()$mean_closest_3_Supermarket,digits = 2)),
+          paste("Mean Distance of Closest 5 Supermarkets (km): ", 
+                round(filtered_postcode_df()$mean_closest_5_Supermarket,digits = 2)),
+          paste("Number of Supermarkets within 400m: ", 
+                round(filtered_postcode_df()$Supermarket_count400m,digits = 2)),
+          paste("Number of Supermarkets within 800m: ", 
+                round(filtered_postcode_df()$Supermarket_count800m,digits = 2)),
+          paste("Number of Supermarkets within 1km: ",
+                round(filtered_postcode_df()$Supermarket_count1km,digits = 2)),
+          paste("Number of Supermarkets within 1.6km: ",
+                round(filtered_postcode_df()$Supermarket_count1.6km,digits = 2)),
+          paste("Number of Supermarkets within 2km: ",
+                round(filtered_postcode_df()$Supermarket_count2km,digits = 2)),
+          paste("Distance to Closest Takeaway (km): ", 
+                round(filtered_postcode_df()$closest_Takeaways,digits = 2)),
+          paste("Mean Distance of Closest 3 Takeaways (km): ", 
+                round(filtered_postcode_df()$mean_closest_3_Takeaways,digits = 2)),
+          paste("Mean Distance of Closest 5 Takeaways (km): ", 
+                round(filtered_postcode_df()$mean_closest_5_Takeaways,digits = 2)),
+          paste("Number of Takeaways within 400m: ", 
+                round(filtered_postcode_df()$Takeaways_count400m,digits = 2)),
+          paste("Number of Takeaways within 800m: ", 
+                round(filtered_postcode_df()$Takeaways_count800m,digits = 2)),
+          paste("Number of Takeaways within 1km: ",
+                round(filtered_postcode_df()$Takeaways_count1km,digits = 2)),
+          paste("Number of Takeaways within 1.6km: ",
+                round(filtered_postcode_df()$Takeaways_count1.6km,digits = 2)),
+          paste("Number of Takeaways within 2km: ",
+                round(filtered_postcode_df()$Takeaways_count2km,digits = 2)),
           sep = "\n")
   })
   
-  # observeEvent(input$postcode,{
-  #   leafletProxy("mymap", data = filtered_postcode_df()) %>%
-  #     clearShapes() %>%
-  #     addCircles(data = filtered_postcode_df(),
-  #                color = "Red",
-  #                fillColor = "red",
-  #                fillOpacity = 0.5)
-  # })
+  observeEvent(input$postcode,{
+    leafletProxy("mymap", data = filtered_postcode_df()) %>%
+      clearShapes() %>%
+      addCircles(data = filtered_postcode_df(),
+                 color = "Red",
+                 fillColor = "red",
+                 fillOpacity = 0.5)
+  })
 
 }
 

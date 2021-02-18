@@ -1,11 +1,24 @@
 library(tidyverse)
 
-# Create FEAT Outlets dataset from POI ------------------------------------
 
 
 poi <- read_csv("poi-extract-2020_09.csv", 
                 header = TRUE, 
                 sep = "|") 
+
+BD_Postcode_Units <- read_csv("ONSPD_NOV_2020_UK_BD.csv",
+                              col_types = cols(
+                                osnrth1m = col_double()
+                              )
+)
+
+england_msoa <- st_read("england_msoa_2011.shp")
+
+# Create FEAT Outlets dataset from POI ------------------------------------
+
+
+
+
 
 case_pointxclass <- function(pointx_class,brand) {
   case_when(
@@ -68,21 +81,12 @@ write_csv(poi,"FEAT_Food_Outlets.csv")
 
 
 
-# Create Holmewood Postcode Units from Bradford Postcode Units ------------
 
-BD_Postcode_Units <- read_csv("ONSPD_NOV_2020_UK_BD.csv")
 
-HW_Postcode_Units <- BD_Postcode_Units %>%
-  select("pcd","oseast1m","osnrth1m","msoa01","lat","long") %>%
-  filter(msoa01 == "E02002234") %>%
-  add_column(PU_ID = 1:nrow(HW_Postcode_Units),.before = "pcd")
-
-write_csv(HW_Postcode_Units,"Holmewood_Postcode_Units.csv")
 
 
 # Create Holmewood MSOA polygon from England MSOA polygon -----------------
 
-england_msoa <- st_read("england_msoa_2011.shp")
 
 holmewood_msoa <- england_msoa %>%
   filter(code == "E02002234")
