@@ -90,6 +90,7 @@ HW_Takeaways_OD_Lines <- Create_FEAT_Subset(FEATOutlets = FEATOutlets,
 HW_TakeawayAccessMetrics <- Calc_FEAT_Access_Met(ODLines = HW_Takeaways_OD_Lines,
                                               FeatType = "Takeaways",
                                               PostcodeDataset = HW_Postcode_Units)
+rm(HW_Takeaways_OD_Lines)
 
 #Writes Takeaways Access Metrics out as CSV file.
 write_csv(HW_TakeawayAccessMetrics,"HW_Takeaway_Access_Metrics.csv")
@@ -104,7 +105,7 @@ HW_AccessMetrics <- HW_SupermarketAccessMetrics %>%
 
 write_csv(HW_AccessMetrics,"HW_Access_Metrics.csv")
 
-
+rm(HW_SupermarketAccessMetrics,HW_TakeawayAccessMetrics,(HW_AccessMetrics))
 
 
 
