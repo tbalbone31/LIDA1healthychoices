@@ -75,37 +75,37 @@ Calc_FEAT_Access_Met <- function(ODLines,FeatType,PostcodeDataset) {
   
   NearestFEAT <- ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste("closest_",FeatType, sep = "") := min(distancekm))
+    summarise(!!paste("cls_",FeatType, sep = "") := min(distancekm))
   
   MeanofNearest3FEAT <- ODLines %>%
     group_by(PU_ID) %>%
     top_n(n=-3,distancekm) %>%
-    summarise(!!paste("mean_closest_3_",FeatType, sep = "") := mean(distancekm))
+    summarise(!!paste("mean3_",FeatType, sep = "") := mean(distancekm))
   
   MeanofNearest5FEAT  <- ODLines %>%
     group_by(PU_ID) %>%
     top_n(n=-5,distancekm) %>%
-    summarise(!!paste("mean_closest_5_",FeatType, sep = "") := mean(distancekm))
+    summarise(!!paste("mean5_",FeatType, sep = "") := mean(distancekm))
   
   FEATcount400m <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_count400m", sep = "") := sum(distancekm <= 0.4))
+    summarise(!!paste(FeatType,"_ct400", sep = "") := sum(distancekm <= 0.4))
   
   FEATcount800m <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_count800m", sep = "") := sum(distancekm <= 0.8))
+    summarise(!!paste(FeatType,"_ct800", sep = "") := sum(distancekm <= 0.8))
   
   FEATcount1km <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_count1km", sep = "") := sum(distancekm <= 1))
+    summarise(!!paste(FeatType,"_ct1000", sep = "") := sum(distancekm <= 1))
   
   FEATcount1.6km <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_count1.6km", sep = "") := sum(distancekm <= 1.6))
+    summarise(!!paste(FeatType,"_ct1600", sep = "") := sum(distancekm <= 1.6))
   
   FEATcount2km <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_count2km", sep = "") := sum(distancekm <= 2))
+    summarise(!!paste(FeatType,"_ct2000", sep = "") := sum(distancekm <= 2))
   
 
   
@@ -133,14 +133,14 @@ Calc_FEAT_Access_Met <- function(ODLines,FeatType,PostcodeDataset) {
            "msoa01",
            "lat",
            "long",
-           paste("closest_",FeatType, sep = ""),
-           paste("mean_closest_3_",FeatType, sep = ""),
-           paste("mean_closest_5_",FeatType, sep = ""),
-           paste(FeatType,"_count400m", sep = ""),
-           paste(FeatType,"_count800m", sep = ""),
-           paste(FeatType,"_count1km", sep = ""),
-           paste(FeatType,"_count1.6km", sep = ""),
-           paste(FeatType,"_count2km", sep = "")
+           paste("cls_",FeatType, sep = ""),
+           paste("mean3_",FeatType, sep = ""),
+           paste("mean5_",FeatType, sep = ""),
+           paste(FeatType,"_ct400", sep = ""),
+           paste(FeatType,"_ct800", sep = ""),
+           paste(FeatType,"_ct1000", sep = ""),
+           paste(FeatType,"_ct1600", sep = ""),
+           paste(FeatType,"_ct2000", sep = "")
     )
   
   
