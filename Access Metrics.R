@@ -128,22 +128,30 @@ rm(HW_Spec_OD_Lines)
 #Combine supermarkets and takeaways datasets and write to csv file
 HW_Acc <- HW_Sup_Acc %>%
   left_join(select(HW_Tway_Acc,
-                   "pcd",c(8:15))
+                   "pcd",c(8:14))
             , by = "pcd") %>%
   left_join(select(HW_Con_Acc,
-                   "pcd",c(8:15))
+                   "pcd",c(8:14))
             , by = "pcd") %>%
   left_join(select(HW_Spec_Acc,
-                   "pcd",c(8:15))
+                   "pcd",c(8:14))
             , by = "pcd")
 
 HW_Acc <- HW_Acc %>%
-  relocate(all_of(c(16,24,32)),
-           .after = 8) %>%
-  relocate(all_of(c(19,27,35)),
-           .after = 12) %>%
-  relocate(all_of(c(22,30,38)),
-           .after = 16)
+  relocate(all_of(c("cls_Tway","cls_ConSt","cls_Spec")),
+           .after = "cls_Sup") %>%
+  relocate(all_of(c("mean3_Tway","mean3_ConSt","mean3_Spec")),
+           .after = "mean3_Sup") %>%
+  relocate(all_of(c("mean5_Tway","mean5_ConSt","mean5_Spec")),
+           .after = "mean5_Sup") %>%
+  relocate(all_of(c("Tway_ct500","ConSt_ct500","Spec_ct500")),
+           .after = "Sup_ct500") %>%
+  relocate(all_of(c("Tway_ct1000","ConSt_ct1000","Spec_ct1000")),
+           .after = "Sup_ct1000") %>%
+  relocate(all_of(c("Tway_ct1600","ConSt_ct1600","Spec_ct1600")),
+           .after = "Sup_ct1600") %>%
+  relocate(all_of(c("Tway_ct2000","ConSt_ct2000","Spec_ct2000")),
+           .after = "Sup_ct2000")
 
 write_csv(HW_Acc,"HW_Access_Metrics.csv")
 
