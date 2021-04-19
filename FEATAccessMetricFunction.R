@@ -38,29 +38,22 @@ Create_FEAT_Subset <-function(FEATOutlets, FEATSubset, Postcode_Units) {
   rm(FEAT_Subset_for_OD)
   
   #Selects only numeric columns to be processed as desire lines
-  Subset_OD_Data_for_Lines <- select(Subset_OD_Data,
-                                     "oseast1m",
-                                     "osnrth1m",
-                                     "feature_easting",
-                                     "feature_northing",
-                                     "Trip_ID",
-                                     "PU_ID",
-                                     paste(FEATSubset,"_ID", sep = ""))
+  Subset_OD_Data <- Subset_OD_Data %>% 
+    select(
+      "oseast1m",
+      "osnrth1m",
+      "feature_easting",
+      "feature_northing",
+      "Trip_ID",
+      "PU_ID",
+      "oslaua",
+      "msoa01",
+      paste(FEATSubset,"_ID", sep = "")) %>%
+    mutate(distancekm = sqrt((feature_easting-oseast1m)**2 + (feature_northing-osnrth1m)**2)/1000) %>%
+    filter(distancekm <= 2)
   
-  rm(Subset_OD_Data)
   
-  #Converts OD into desire lines and adds a distance calculation
-  Subset_OD_Lines <- od_coords2line(Subset_OD_Data_for_Lines, 
-                                    crs = 27700, 
-                                    remove_duplicates = FALSE) #converts the OD points to "desire lines"
-  
-  rm(Subset_OD_Data_for_Lines)
-  
-  Subset_OD_Lines$distancekm = as.numeric(st_length(Subset_OD_Lines)/1000)
-  
-  Subset_OD_Lines <- filter(Subset_OD_Lines,distancekm <= 2)
-  
-  return(Subset_OD_Lines)
+  return(Subset_OD_Data)
   
   
 }
@@ -87,25 +80,21 @@ Calc_FEAT_Access_Met <- function(ODLines,FeatType,PostcodeDataset) {
     top_n(n=-5,distancekm) %>%
     summarise(!!paste("mean5_",FeatType, sep = "") := mean(distancekm))
   
-  FEATcount400m <-ODLines %>%
+  FEATcount500m <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_ct400", sep = "") := sum(distancekm <= 0.4))
-  
-  FEATcount800m <-ODLines %>%
-    group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_ct800", sep = "") := sum(distancekm <= 0.8))
+    summarise(!!paste("ct500_", FeatType, sep = "") := sum(distancekm <= 0.5))
   
   FEATcount1km <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_ct1000", sep = "") := sum(distancekm <= 1))
+    summarise(!!paste("ct1000_",FeatType, sep = "") := sum(distancekm <= 1))
   
   FEATcount1.6km <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_ct1600", sep = "") := sum(distancekm <= 1.6))
+    summarise(!!paste("ct1600_",FeatType, sep = "") := sum(distancekm <= 1.6))
   
   FEATcount2km <-ODLines %>%
     group_by(PU_ID) %>%
-    summarise(!!paste(FeatType,"_ct2000", sep = "") := sum(distancekm <= 2))
+    summarise(!!paste("ct2000_",FeatType, sep = "") := sum(distancekm <= 2))
   
 
   
@@ -116,9 +105,7 @@ Calc_FEAT_Access_Met <- function(ODLines,FeatType,PostcodeDataset) {
               by = "PU_ID") %>%
     left_join(MeanofNearest5FEAT,
               by = "PU_ID") %>%
-    left_join(FEATcount400m,
-              by = "PU_ID") %>%
-    left_join(FEATcount800m,
+    left_join(FEATcount500m,
               by = "PU_ID") %>%
     left_join(FEATcount1km,
               by = "PU_ID") %>%
@@ -136,11 +123,10 @@ Calc_FEAT_Access_Met <- function(ODLines,FeatType,PostcodeDataset) {
            paste("cls_",FeatType, sep = ""),
            paste("mean3_",FeatType, sep = ""),
            paste("mean5_",FeatType, sep = ""),
-           paste(FeatType,"_ct400", sep = ""),
-           paste(FeatType,"_ct800", sep = ""),
-           paste(FeatType,"_ct1000", sep = ""),
-           paste(FeatType,"_ct1600", sep = ""),
-           paste(FeatType,"_ct2000", sep = "")
+           paste("ct500_", FeatType, sep = ""),
+           paste("ct1000_",FeatType, sep = ""),
+           paste("ct1600_",FeatType, sep = ""),
+           paste("ct2000_",FeatType, sep = "")
     )
   
   
