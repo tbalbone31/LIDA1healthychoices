@@ -92,67 +92,67 @@ function(input,output,session) {
   
   pcd_met_chart_df <-reactive({
     
-    name <- c("Supermarket",
+    name <- c("Supermarkets",
               "Speciality Outlets",
-              "Takeaway",
-              "Convenience Stores")
+              "Convenience Stores",
+              "Takeaways")
     
     pcd_met_chart <- switch(input$pcdmetcht,
                             "closest" = data.frame(
                               id = seq(1,4,1),
                               name = name,
                               value = c(filtered_postcode_df()$cls_Sup,
-                                        filtered_postcode_df()$cls_Tway,
+                                        filtered_postcode_df()$cls_Spec,
                                         filtered_postcode_df()$cls_ConSt,
-                                        filtered_postcode_df()$cls_Spec)
+                                        filtered_postcode_df()$cls_Tway)
                             ),
                             "mean3" = data.frame(
                               id = seq(1,4,1),
                               name = name,
                               value = c(filtered_postcode_df()$mean3_Sup,
-                                        filtered_postcode_df()$mean3_Tway,
+                                        filtered_postcode_df()$mean3_Spec,
                                         filtered_postcode_df()$mean3_ConSt,
-                                        filtered_postcode_df()$mean3_Spec)
+                                        filtered_postcode_df()$mean3_Tway)
                             ),
                             "mean5"= data.frame(
                               id = seq(1,4,1),
                               name = name,
                               value = c(filtered_postcode_df()$mean5_Sup,
-                                        filtered_postcode_df()$mean5_Tway,
+                                        filtered_postcode_df()$mean5_Spec,
                                         filtered_postcode_df()$mean5_ConSt,
-                                        filtered_postcode_df()$mean5_Spec)
+                                        filtered_postcode_df()$mean5_Tway)
                             ),
                             "count500m"= data.frame(
                               id = seq(1,4,1),
                               name = name,
                               value = c(filtered_postcode_df()$ct500_Sup,
-                                        filtered_postcode_df()$ct500_Tway,
+                                        filtered_postcode_df()$ct500_Spec,
                                         filtered_postcode_df()$ct500_ConSt,
-                                        filtered_postcode_df()$ct500_Spec)
+                                        filtered_postcode_df()$ct500_Tway)
                             ),
                             "count1km"= data.frame(
                               id = seq(1,4,1),
                               name = name,
                               value = c(filtered_postcode_df()$ct1000_Sup,
-                                        filtered_postcode_df()$ct1000_Tway,
+                                        filtered_postcode_df()$ct1000_Spec,
                                         filtered_postcode_df()$ct1000_ConSt,
-                                        filtered_postcode_df()$ct1000_Spec)
+                                        filtered_postcode_df()$ct1000_Tway)
                             ),
                             "count1.6km" = data.frame(
                               id = seq(1,4,1),
                               name = name,
                               value = c(filtered_postcode_df()$ct1600_Sup,
-                                        filtered_postcode_df()$ct1600_Tway,
+                                        filtered_postcode_df()$ct1600_Spec,
                                         filtered_postcode_df()$ct1600_ConSt,
-                                        filtered_postcode_df()$ct1600_Spec)
+                                        filtered_postcode_df()$ct1600_Tway)
                             ),
                             "count2km" = data.frame(
                               id = seq(1,4,1),
                               name = name,
                               value = c(filtered_postcode_df()$ct2000_Sup,
-                                        filtered_postcode_df()$ct2000_Tway,
+                                        filtered_postcode_df()$ct2000_Spec,
                                         filtered_postcode_df()$ct2000_ConSt,
-                                        filtered_postcode_df()$ct2000_Spec)
+                                        filtered_postcode_df()$ct2000_Tway)
                             )
     ) 
     
@@ -230,12 +230,23 @@ function(input,output,session) {
   # selected or typed into the search function.
   output$postcodemetrics <- renderPlot({
     
+    ylabel <- switch(input$pcdmetcht,
+                     "Closest Outlet" = "Distance (km)",
+                     "Average of Nearest 3 Outlets" = "Distance (km)",
+                     "Average of Nearest 5 Outlets" = "Distance (km)",
+                     "Number of Outlets within 500m" = "Count within 500m",
+                     "Number of Outlets within 1km" = "Count within 1km",
+                     "Number of Outlets within 1.6km (Approx 1 mile" = "Count within 1.6km",
+                     "Number of Outlets within 2km" = "Count within 2km")
     
     
-    ggplot(pcd_met_chart_df(), aes(x = id, y= value)) +
+    
+    ggplot(pcd_met_chart_df(), aes(x = id, y= value, fill=as.factor(value))) +
       geom_bar(stat = "identity",width = 0.5) +
-      scale_fill_manual(values = c("Green", "Blue", "Orange", "Red")) +
-      scale_x_continuous(breaks = pcd_met_chart_df()$id, labels = pcd_met_chart_df()$name)
+      scale_fill_manual(values = c("green","blue","orange","red")) +
+      scale_x_continuous(breaks = pcd_met_chart_df()$id, labels = pcd_met_chart_df()$name) +
+      theme(legend.position="none") +
+      xlab("Food Outlet Category") + ylab(~ylabel)
   })
   
   

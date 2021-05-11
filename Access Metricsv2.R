@@ -12,7 +12,9 @@ library(stplanr)
 library(tidyverse)
 library(hrbrthemes)
 
-FEATOutlets <- read_csv("Bradford_FEAT_Food_Outlets.csv")
+FEATOutlets <- read_csv("Bradford_FEAT_Food_Outlets.csv") %>%
+  mutate(across(3:4, trunc))
+  
 BD_Postcode_Units <- read_csv("ONSPD_NOV_2020_UK_BD.csv",
                               col_types = cols(
                                 osnrth1m = col_double()

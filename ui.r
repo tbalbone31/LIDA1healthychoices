@@ -21,14 +21,14 @@ fluidPage(
       ),
       conditionalPanel(
         condition = "output.panelStatus",
-        radioButtons(inputId = "pcdmetcht",
+        selectInput(inputId = "pcdmetcht",
                      label = "Select your Access Metrics",
                      choices = c("Closest Outlet" = "closest",
                                  "Average of Nearest 3 Outlets" = "mean3",
                                  "Average of Nearest 5 Outlets" = "mean5",
                                  "Number of Outlets within 500m" = "count500m",
                                  "Number of Outlets within 1km" = "count1km",
-                                 "Number of Outlets within 1.6m (Approx 1 mile" = "count1.6km",
+                                 "Number of Outlets within 1.6km (Approx 1 mile" = "count1.6km",
                                  "Number of Outlets within 2km" = "count2km")
         ),
         plotOutput(outputId = "postcodemetrics")
