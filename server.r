@@ -16,25 +16,32 @@ library(fontawesome)
 
 # Load Data ---------------------------------------------------------------
 
-
-
-
+#MSOA shapefile clipped to Bradford Local Authority
 BD_msoa <- st_read("Bradford_MSOA.shp")
+
+#All postcode units within the Bradford Local Authority.
 BD_PCD <- read_csv("Bradford_Postcode_Units.csv")
+
+#Access measures calculated for Bradford postcodes in separate script.
 BD_Acc <- read_csv("BD_Access_Metrics.csv")
 
+#Combined AHAH and E-Food deserts index
 BD_ahah_efood <- st_read("ahah_efood_combined_Bradford.shp")
 
+#postcode unit characters from dataframe
 pcd <- BD_Acc$pcd
 
+#Vector of LSOA contained within the HolmeWood study area
 HW_LSOA <- c("Bradford 052A",
              "Bradford 052B",
              "Bradford 052C",
              "Bradford 052D",
              "Bradford 052E")
 
+#character representing the Holme wood MSOA
 HW_MSOA <- "Bradford 052"
 
+#Vector containing the overlay choices for selectinput feature.
 overlaychoices <- c("None",
                     "AHAH v2 Retail Domain",
                     "E-Food Deserts Index",
@@ -48,10 +55,11 @@ latlong <- "+init=epsg:4326"
 
 # Data processing ---------------------------------------------------------
 
-
+#Transforms shapefules into correct CRS for rendering in leaflet.
 BD_MSOA_lf <- st_transform(BD_msoa, crs = latlong)
 BD_ahah_efood_lf <- st_transform(BD_ahah_efood, crs = latlong)
 
+#Create HolmeWood subsets from Bradford files
 HW_ahah_efood_lf <- BD_ahah_efood_lf %>%
   filter(LSOA11N %in% HW_LSOA)
 
@@ -71,14 +79,17 @@ HWpcd <- HW_Acc$pcd
 
 
 
-
+#R Shiny Server function
 function(input,output,session) {
   
+  #Sends the choice of postcode unit to the selectinput feature in UI
   updateSelectInput(session, "postcode", choices = c("",HW_PCD$pcd))
   
+  #Sends the choice of overlay to the selectinput feature in UI
   updateSelectInput(session, "overlay", choices = overlaychoices)
   
-  
+  #Creates a dataframe containing a single postcode in order to plot correct
+  #access measures
   filtered_postcode_df <- reactive({
     
     req(input$postcode)
@@ -89,7 +100,8 @@ function(input,output,session) {
   })
   
   
-  
+  #Creates data frame containing only relevant access measures for a single
+  #postcode
   pcd_met_chart_df <-reactive({
     
     name <- c("Supermarkets",
@@ -97,6 +109,8 @@ function(input,output,session) {
               "Convenience Stores",
               "Takeaways")
     
+    #Switch statement that combines the relevant measures for the four outlet types
+    #for a single measure.
     pcd_met_chart <- switch(input$pcdmetcht,
                             "closest" = data.frame(
                               id = seq(1,4,1),
@@ -162,29 +176,33 @@ function(input,output,session) {
     input$postcode != ""
   })
   
+  
   outputOptions(output, "panelStatus", suspendWhenHidden = FALSE)
   
+  
+  #Changes the postcode in the selectinput to match a point clicked in the map.
   Currentpostcode <- reactive ({
     pcdID <- input$mymap_marker_click
     pcdID <- pcdID$id
   })
   
   
-
-
-  
+  #Renders a dyanmic leaflet map.
   output$mymap <- renderLeaflet({
       
 
-    
       leaflet() %>%
         addTiles() %>% #Add default OpenStreetMap map tiles
+      
+        #Adds MSOA polygon to the map as a default layer
         addPolygons(data = HW_MSOA_lf,
                     color = "Red", 
                     weight = 2, 
                     fillOpacity = 0,
                     group = "Holme Wood Boundary",
                     layerId = "holmewoodmsoa") %>%
+      
+      #Adds postcode units as circle markers and clusters
         addCircleMarkers(data = HW_Acc,
                          clusterOptions = markerClusterOptions(showCoverageOnHover = FALSE,
                                                                zoomToBoundsOnClick = TRUE),
@@ -192,10 +210,13 @@ function(input,output,session) {
                          label = HWpcd,
                          layerId = HWpcd,
                          group = "Holme Wood Postcodes") %>%
+      #Adds a layer control to the map
         addLayersControl(
           overlayGroups = "Holme Wood Postcodes","overlay",
           options = layersControlOptions(collapsed = FALSE)
         ) %>%
+      
+      #Adds an easybutton to allow fast changing of map scale
       addEasyButton(easyButton(
         
         states = list(
@@ -230,6 +251,7 @@ function(input,output,session) {
   # selected or typed into the search function.
   output$postcodemetrics <- renderPlot({
     
+    #switch statement to dynamically change label
     ylabel <- switch(input$pcdmetcht,
                      "Closest Outlet" = "Distance (km)",
                      "Average of Nearest 3 Outlets" = "Distance (km)",
@@ -250,21 +272,8 @@ function(input,output,session) {
   })
   
   
-  # output$userguide <- renderText({
-  #   
-  #   paste(
-  #     sep = "</br></br>",
-  #     "",
-  #     "<b>User Guide for Community Toolkit</b>",
-  #     "This Community Toolkit has been developed for policymakers and local residents of the Holme Wood locality of Bradford.  It is a proof of concept.",
-  #     ""
-  #     
-  #   )
-  #   
-  #   
-  # })
-  
-  
+
+  #Dynamic overlay information text that changes whenever an overlay is selected.
   output$overlayinfo <- renderText({
     
     case_when(
@@ -354,7 +363,7 @@ function(input,output,session) {
 
 # Redraw map objects based on user selection ------------------------------
 
-  
+  #Sets a leaflet proxy for changing map elements without redrawing entire map.
   proxy <- leafletProxy("mymap")
   
    #Redraw map objects based on user selecting 'None' for overlay
@@ -433,13 +442,14 @@ function(input,output,session) {
                      "Food Insecurity Risk" = BD_MSOA_lf$fdns_vl)
     
              
-  #Loads a shapefule based on user selection
+  #Loads a shapefile based on user selection
   shp <- switch(input$overlay,
                 "AHAH v2 Retail Domain" = BD_ahah_efood_lf,
                 "E-Food Deserts Index" = BD_ahah_efood_lf,
                 "Childhood Obesity" = BD_MSOA_lf,
                 "Food Insecurity Risk" = BD_MSOA_lf)
   
+  #Loads a legend variable to set a dyanmic legend.
   legend <- switch(input$overlay,
                    "AHAH v2 Retail Domain" = "AHAH v2 Retail Domain Deciles",
                    "E-Food Deserts Index" = "E-Food Deserts Index Deciles",
@@ -449,7 +459,8 @@ function(input,output,session) {
   
 
   
-  
+    #uses the leaflet proxy to change the map features and rebuild layers in
+  #correct order without reconstructing entire map.
       proxy %>%
         clearGroup("overlay") %>%
         clearGroup("Holme Wood Postcodes") %>%
@@ -486,16 +497,3 @@ function(input,output,session) {
     
   })
   
-
-  
-  
-  # observeEvent(input$postcode,{
-  #   leafletProxy("mymap", data = filtered_postcode_df()) %>%
-  #     clearShapes() %>%
-  #     addCircles(data = filtered_postcode_df(),
-  #                color = "Red",
-  #                fillColor = "red",
-  #                fillOpacity = 0.5)
-  # })
-  
-}

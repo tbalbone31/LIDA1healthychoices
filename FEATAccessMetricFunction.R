@@ -7,12 +7,13 @@
 Create_FEAT_Subset <-function(FEATOutlets, FEATSubset, Postcode_Units) {
   
   
-  #Creates a Subset subset for testing the routing process
+  #Creates a subset for calculating food outlet measures on a single category.
   FEAT_Subset_for_OD <- FEATOutlets %>%
     filter(FEATClass == FEATSubset) %>%
     select("feature_easting",
            "feature_northing")
   
+  #Adds an ID for each unique food outlet
   FEAT_Subset_for_OD <- mutate(FEAT_Subset_for_OD,
                                !!paste(FEATSubset,"_ID",sep = "") := 1:nrow(FEAT_Subset_for_OD),
                                .before = "feature_easting")
@@ -37,7 +38,7 @@ Create_FEAT_Subset <-function(FEATOutlets, FEATSubset, Postcode_Units) {
   
   rm(FEAT_Subset_for_OD)
   
-  #Selects only numeric columns to be processed as desire lines
+  #Selects only numeric columns to be processed
   Subset_OD_Data <- Subset_OD_Data %>% 
     select(
       "oseast1m",
@@ -62,42 +63,47 @@ Create_FEAT_Subset <-function(FEATOutlets, FEATSubset, Postcode_Units) {
 
 # Food Outlet Access Metrics ----------------------------------------------
 
-
-
 Calc_FEAT_Access_Met <- function(ODLines,FeatType,PostcodeDataset) {
   
+  #Calculates the closest outlet distance in KM
   NearestFEAT <- ODLines %>%
     group_by(PU_ID) %>%
     summarise(!!paste("cls_",FeatType, sep = "") := min(distancekm))
   
+  #Calculates the mean of the nearest 3 outlets in KM
   MeanofNearest3FEAT <- ODLines %>%
     group_by(PU_ID) %>%
     top_n(n=-3,distancekm) %>%
     summarise(!!paste("mean3_",FeatType, sep = "") := mean(distancekm))
   
+  #Calculates the mean of the nearest 5 outlets in KM
   MeanofNearest5FEAT  <- ODLines %>%
     group_by(PU_ID) %>%
     top_n(n=-5,distancekm) %>%
     summarise(!!paste("mean5_",FeatType, sep = "") := mean(distancekm))
   
+  #Calculates how many outlets are within 500m
   FEATcount500m <-ODLines %>%
     group_by(PU_ID) %>%
     summarise(!!paste("ct500_", FeatType, sep = "") := sum(distancekm <= 0.5))
   
+  #Calculates how many outlets are within 1km
   FEATcount1km <-ODLines %>%
     group_by(PU_ID) %>%
     summarise(!!paste("ct1000_",FeatType, sep = "") := sum(distancekm <= 1))
   
+  #Calculates how many outlets are within 1.6km (approx 1 mile)
   FEATcount1.6km <-ODLines %>%
     group_by(PU_ID) %>%
     summarise(!!paste("ct1600_",FeatType, sep = "") := sum(distancekm <= 1.6))
   
+  #Calculates how many outlets are within 2km
   FEATcount2km <-ODLines %>%
     group_by(PU_ID) %>%
     summarise(!!paste("ct2000_",FeatType, sep = "") := sum(distancekm <= 2))
   
 
-  
+  #Joins all measures back into a single dataframe for the outlet category.
   FEATAccessMetrics <- PostcodeDataset %>%
     left_join(NearestFEAT,
               by = "PU_ID") %>%

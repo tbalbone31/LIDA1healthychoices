@@ -2,8 +2,11 @@ library(leaflet) # for interactive maps
 
 fluidPage(
   
+  #Title
   titlePanel("Holme Wood Community Toolkit"),
   
+  #Side bar panel with options to change overlay, select postcodes and change
+  # type of access measure
   sidebarLayout(
     sidebarPanel(
       selectInput(inputId = "overlay",
@@ -19,6 +22,7 @@ fluidPage(
                   choices = NULL,
                   selected = NULL
       ),
+      #conditional panel that only appears when a postcode is selected.
       conditionalPanel(
         condition = "output.panelStatus",
         selectInput(inputId = "pcdmetcht",
@@ -31,8 +35,12 @@ fluidPage(
                                  "Number of Outlets within 1.6km (Approx 1 mile" = "count1.6km",
                                  "Number of Outlets within 2km" = "count2km")
         ),
+        
+        #Main postcode unit measure plots.
         plotOutput(outputId = "postcodemetrics")
       )),
+    
+    #Main panel, split into 3 tabs with the Map, User Guide and Data Sources.
     mainPanel(
       tabsetPanel(type = "tabs",
                   tabPanel("Map",

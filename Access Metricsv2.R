@@ -12,9 +12,13 @@ library(stplanr)
 library(tidyverse)
 library(hrbrthemes)
 
+
+#Load food outlet data in.
 FEATOutlets <- read_csv("Bradford_FEAT_Food_Outlets.csv") %>%
   mutate(across(3:4, trunc))
-  
+
+
+#Read postcode unit data in  
 BD_Postcode_Units <- read_csv("ONSPD_NOV_2020_UK_BD.csv",
                               col_types = cols(
                                 osnrth1m = col_double()
@@ -22,7 +26,7 @@ BD_Postcode_Units <- read_csv("ONSPD_NOV_2020_UK_BD.csv",
 )
 
 
-
+#Set useful functions for calculating access measures later.
 source("FEATAccessMetricFunction.R")
 
 
@@ -56,115 +60,6 @@ HW_Postcode_Units <- HW_Postcode_Units %>%
 
 #Writes DF out to a CSV file
 write_csv(HW_Postcode_Units,"Holmewood_Postcode_Units.csv")
-
-
-
-
-
-
-
-# Holmewood Access Metrics ------------------------------------------------
-
-#Create Supermarket Origin Destination Desire lines to be use for distance metrics
-HW_Sup_OD_Lines <- Create_FEAT_Subset(FEATOutlets = FEATOutlets,
-                                           FEATSubset = "Supermarkets",
-                                           Postcode_Units = HW_Postcode_Units)
-
-
-
-
-
-#Creates Access Metrics DF (see documentation for list)
-HW_Sup_Acc <- Calc_FEAT_Access_Met(ODLines = HW_Sup_OD_Lines,
-                                                 FeatType = "Sup",
-                                                 PostcodeDataset = HW_Postcode_Units)
-
-#Removes desire lines from GE
-rm(HW_Sup_OD_Lines)
-
-
-# #Writes Access Metrics out as CSV file
-# write_csv(HW_SupermarketAccessMetrics,"HW_Supermarket_Access_Metrics.csv")
-
-
-#Create Takeaways Origin Destination Desire lines to be use for distance metrics
-HW_Tway_OD_Lines <- Create_FEAT_Subset(FEATOutlets = FEATOutlets,
-                                              FEATSubset = "Takeaways",
-                                              Postcode_Units = HW_Postcode_Units)
-
-
-#Creates Takeaway Access Metrics DF (see documentation for list)
-HW_Tway_Acc <- Calc_FEAT_Access_Met(ODLines = HW_Tway_OD_Lines,
-                                              FeatType = "Tway",
-                                              PostcodeDataset = HW_Postcode_Units)
-rm(HW_Tway_OD_Lines)
-
-#Writes Takeaways Access Metrics out as CSV file.
-#write_csv(HW_TakeawayAccessMetrics,"HW_Takeaway_Access_Metrics.csv")
-
-
-
-
-HW_Con_OD_Lines <- Create_FEAT_Subset(FEATOutlets = FEATOutlets,
-                                            FEATSubset = "Convenience Stores",
-                                            Postcode_Units = HW_Postcode_Units)
-
-
-#Creates Convenience Store Access Metrics DF (see documentation for list)
-HW_Con_Acc <- Calc_FEAT_Access_Met(ODLines = HW_Con_OD_Lines,
-                                                 FeatType = "ConSt",
-                                                 PostcodeDataset = HW_Postcode_Units)
-rm(HW_Con_OD_Lines)
-
-
-
-HW_Spec_OD_Lines <- Create_FEAT_Subset(FEATOutlets = FEATOutlets,
-                                            FEATSubset = "Speciality Outlets",
-                                            Postcode_Units = HW_Postcode_Units)
-
-
-#Creates Takeaway Access Metrics DF (see documentation for list)
-HW_Spec_Acc <- Calc_FEAT_Access_Met(ODLines = HW_Spec_OD_Lines,
-                                                 FeatType = "Spec",
-                                                 PostcodeDataset = HW_Postcode_Units)
-rm(HW_Spec_OD_Lines)
-
-
-
-#Combine supermarkets and takeaways datasets and write to csv file
-HW_Acc <- HW_Sup_Acc %>%
-  left_join(select(HW_Tway_Acc,
-                   "pcd",c(8:14))
-            , by = "pcd") %>%
-  left_join(select(HW_Con_Acc,
-                   "pcd",c(8:14))
-            , by = "pcd") %>%
-  left_join(select(HW_Spec_Acc,
-                   "pcd",c(8:14))
-            , by = "pcd")
-
-HW_Acc <- HW_Acc %>%
-  relocate(all_of(c("cls_Tway","cls_ConSt","cls_Spec")),
-           .after = "cls_Sup") %>%
-  relocate(all_of(c("mean3_Tway","mean3_ConSt","mean3_Spec")),
-           .after = "mean3_Sup") %>%
-  relocate(all_of(c("mean5_Tway","mean5_ConSt","mean5_Spec")),
-           .after = "mean5_Sup") %>%
-  relocate(all_of(c("ct500_Tway","ct500_ConSt","ct500_Spec")),
-           .after = "ct500_Sup") %>%
-  relocate(all_of(c("ct1000_Tway","ct1000_ConSt","ct1000_Spec")),
-           .after = "ct1000_Sup") %>%
-  relocate(all_of(c("ct1600_Tway","ct1600_ConSt","ct1600_Spec")),
-           .after = "ct1600_Sup") %>%
-  relocate(all_of(c("ct2000_Tway","ct2000_ConSt","ct2000_Spec")),
-           .after = "ct2000_Sup")
-
-write_csv(HW_Acc,"HW_Access_Metrics.csv")
-
-
-
-
-
 
 
 
